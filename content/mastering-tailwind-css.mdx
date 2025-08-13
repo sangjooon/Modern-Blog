@@ -1,0 +1,95 @@
+# Tailwind CSS 마스터하기
+
+Tailwind CSS는 유틸리티 퍼스트 접근 방식을 통해 빠르고 효율적인 스타일링을 가능하게 하는 CSS 프레임워크입니다.
+
+## Tailwind CSS의 철학
+
+기존의 CSS 프레임워크와 달리, Tailwind CSS는 미리 정의된 컴포넌트 대신 **유틸리티 클래스**를 제공합니다.
+
+### 장점
+
+1. **빠른 개발 속도**: HTML을 벗어나지 않고 스타일링 가능
+2. **일관성**: 디자인 시스템이 내장되어 일관된 스타일 유지
+3. **커스터마이징**: 프로젝트에 맞게 쉽게 커스터마이징 가능
+4. **번들 크기 최적화**: 사용하지 않는 CSS 자동 제거
+
+## 핵심 개념들
+
+### 1. 유틸리티 클래스
+
+기존 CSS 방식과 Tailwind CSS 방식을 비교해보겠습니다.
+
+기존 방식:
+\`\`\`html
+<div class="card">
+  <h2 class="card-title">제목</h2>
+  <p class="card-description">설명</p>
+</div>
+\`\`\`
+
+Tailwind CSS 방식:
+\`\`\`html
+<div class="bg-white rounded-lg shadow-md p-6">
+  <h2 class="text-2xl font-bold text-gray-900 mb-2">제목</h2>
+  <p class="text-gray-600">설명</p>
+</div>
+\`\`\`
+
+### 2. 반응형 디자인
+
+Tailwind CSS는 모바일 퍼스트 접근 방식을 사용합니다:
+
+\`\`\`html
+<div class="w-full md:w-1/2 lg:w-1/3">
+  반응형 컨테이너
+</div>
+\`\`\`
+
+### 3. 상태 변형
+
+호버, 포커스 등의 상태를 쉽게 스타일링할 수 있습니다:
+
+\`\`\`html
+<button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+  버튼
+</button>
+\`\`\`
+
+## 베스트 프랙티스
+
+### 1. 컴포넌트 추출
+
+반복되는 스타일은 컴포넌트로 추출하세요:
+
+\`\`\`jsx
+const Button = ({ children, variant = 'primary' }) => {
+  const baseClasses = 'font-bold py-2 px-4 rounded transition-colors';
+  const variants = {
+    primary: 'bg-blue-500 hover:bg-blue-700 text-white',
+    secondary: 'bg-gray-500 hover:bg-gray-700 text-white',
+  };
+  
+  return (
+    <button className={`${baseClasses} ${variants[variant]}`}>
+      {children}
+    </button>
+  );
+};
+\`\`\`
+
+### 2. 커스텀 유틸리티 생성
+
+프로젝트에 특화된 유틸리티를 만들 수 있습니다:
+
+\`\`\`css
+@layer utilities {
+  .text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+\`\`\`
+
+## 마무리
+
+Tailwind CSS는 처음에는 낯설 수 있지만, 익숙해지면 매우 효율적이고 강력한 도구가 됩니다. 꾸준한 연습을 통해 마스터해보세요!
+\`\`\`

@@ -1,0 +1,134 @@
+# TypeScript 베스트 프랙티스
+
+TypeScript는 JavaScript에 정적 타입을 추가한 언어로, 대규모 애플리케이션 개발에서 코드의 안정성과 유지보수성을 크게 향상시킵니다.
+
+## 기본 원칙
+
+### 1. 명시적 타입 선언
+
+가능한 한 명시적으로 타입을 선언하세요:
+
+\`\`\`typescript
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  isActive: boolean;
+}
+
+const createUser = (userData: Omit<User, 'id'>): User => {
+  return {
+    id: Math.random(),
+    ...userData,
+  };
+};
+\`\`\`
+
+### 2. 유니온 타입 활용
+
+다양한 가능성을 표현할 때 유니온 타입을 사용하세요:
+
+\`\`\`typescript
+type Status = 'loading' | 'success' | 'error';
+type Theme = 'light' | 'dark';
+
+interface ApiResponse<T> {
+  status: Status;
+  data?: T;
+  error?: string;
+}
+\`\`\`
+
+## 고급 패턴
+
+### 1. 제네릭 활용
+
+재사용 가능한 타입을 만들 때 제네릭을 활용하세요:
+
+\`\`\`typescript
+interface Repository<T> {
+  findById(id: string): Promise<T | null>;
+  create(item: Omit<T, 'id'>): Promise<T>;
+  update(id: string, item: Partial<T>): Promise<T>;
+  delete(id: string): Promise<void>;
+}
+\`\`\`
+
+### 2. 유틸리티 타입 활용
+
+TypeScript의 내장 유틸리티 타입들을 적극 활용하세요:
+
+\`\`\`typescript
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+  createdAt: Date;
+}
+
+type PublicUser = Pick<User, 'id' | 'name' | 'email'>;
+type CreateUserRequest = Omit<User, 'id' | 'createdAt'>;
+type UpdateUserRequest = Partial<User>;
+type RequiredUser = Required<User>;
+\`\`\`
+
+### 3. 타입 가드 사용
+
+런타임에서 타입을 안전하게 확인하세요:
+
+\`\`\`typescript
+interface Dog {
+  type: 'dog';
+  breed: string;
+}
+
+interface Cat {
+  type: 'cat';
+  meowSound: string;
+}
+
+type Pet = Dog | Cat;
+
+const isDog = (pet: Pet): pet is Dog => {
+  return pet.type === 'dog';
+};
+\`\`\`
+
+## 실무 팁
+
+### 1. 엄격한 설정 사용
+
+tsconfig.json에서 엄격한 설정을 활성화하세요:
+
+\`\`\`json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
+  }
+}
+\`\`\`
+
+### 2. 타입 정의 파일 분리
+
+복잡한 타입들은 별도 파일로 분리하여 관리하세요.
+
+### 3. 점진적 마이그레이션
+
+기존 JavaScript 프로젝트를 TypeScript로 마이그레이션할 때는 점진적으로 진행하세요:
+
+1. allowJs: true 설정으로 시작
+2. 파일을 하나씩 .ts로 변환  
+3. any 타입을 구체적인 타입으로 교체
+4. 엄격한 설정 점진적 활성화
+
+## 마무리
+
+TypeScript는 초기 학습 비용이 있지만, 장기적으로 코드의 품질과 개발 생산성을 크게 향상시킵니다. 꾸준한 연습과 베스트 프랙티스 적용을 통해 TypeScript의 진정한 가치를 경험해보세요!
+
+TypeScript 공식 문서의 핸드북을 통해 더 깊이 있는 내용을 학습할 수 있습니다.
+\`\`\`
