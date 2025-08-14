@@ -1,0 +1,249 @@
+---
+title: "React Hooks 완벽 가이드"
+date: "2024-01-20"
+readTime: "15분"
+tags: ["React", "Hooks", "JavaScript"]
+---
+
+# React Hooks 완벽 가이드
+
+React Hooks는 함수형 컴포넌트에서 상태와 생명주기를 관리할 수 있게 해주는 기능입니다.
+
+## 기본 Hooks
+
+### useState
+
+가장 기본적인 Hook으로 상태를 관리합니다:
+
+```jsx
+import { useState } from "react";
+
+function Counter() {
+  const [count, setCount] = useState(0);
+
+  return (
+    <div>
+      <p>카운트: {count}</p>
+      <button onClick={() => setCount(count + 1)}>증가</button>
+    </div>
+  );
+}
+```
+
+### useEffect
+
+컴포넌트의 생명주기와 관련된 작업을 처리합니다:
+
+```jsx
+import { useState, useEffect } from "react";
+
+function UserProfile({ userId }) {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const response = await fetch(`/api/users/${userId}`);
+        const userData = await response.json();
+        setUser(userData);
+      } catch (error) {
+        console.error("사용자 정보를 가져오는데 실패했습니다:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchUser();
+  }, [userId]); // userId가 변경될 때만 실행
+
+  if (loading) return <div>로딩 중...</div>;
+  if (!user) return <div>사용자를 찾을 수 없습니다.</div>;
+
+  return (
+    <div>
+      <h2>{user.name}</h2>
+      <p>{user.email}</p>
+    </div>
+  );
+}
+```
+
+## 커스텀 Hooks
+
+자주 사용하는 로직을 재사용 가능한 Hook으로 만들 수 있습니다:
+
+```jsx
+import { useState, useEffect } from "react";
+
+function useLocalStorage(key, initialValue) {
+  const [storedValue, setStoredValue] = useState(() => {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      console.error(error);
+      return initialValue;
+    }
+  });
+
+  const setValue = (value) => {
+    try {
+      const valueToStore =
+        value instanceof Function ? value(storedValue) : value;
+      setStoredValue(valueToStore);
+      window.localStorage.setItem(key, JSON.stringify(valueToStore));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return [storedValue, setValue];
+}
+
+// 사용 예시
+function ThemeToggle() {
+  const [theme, setTheme] = useLocalStorage("theme", "light");
+
+  return (
+    <button onClick={() => setTheme(theme === "light" ? "dark" : "light")}>
+      현재 테마: {theme}
+    </button>
+  );
+}
+```
+
+## 고급 Hooks
+
+### useReducer
+
+복잡한 상태 로직을 관리할 때 사용합니다:
+
+```jsx
+import { useReducer } from "react";
+
+const initialState = { count: 0 };
+
+function reducer(state, action) {
+  switch (action.type) {
+    case "increment":
+      return { count: state.count + 1 };
+    case "decrement":
+      return { count: state.count - 1 };
+    case "reset":
+      return { count: 0 };
+    default:
+      throw new Error();
+  }
+}
+
+function Counter() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  return (
+    <div>
+      <p>카운트: {state.count}</p>
+      <button onClick={() => dispatch({ type: "increment" })}>+</button>
+      <button onClick={() => dispatch({ type: "decrement" })}>-</button>
+      <button onClick={() => dispatch({ type: "reset" })}>리셋</button>
+    </div>
+  );
+}
+```
+
+### useCallback과 useMemo
+
+성능 최적화를 위한 Hook들입니다:
+
+```jsx
+import { useState, useCallback, useMemo } from "react";
+
+function ExpensiveComponent({ items, onItemClick }) {
+  // items가 변경될 때만 계산
+  const processedItems = useMemo(() => {
+    return items.map((item) => ({
+      ...item,
+      processed: item.value * 2,
+    }));
+  }, [items]);
+
+  // onItemClick이 변경되지 않는 한 함수 재생성 방지
+  const handleClick = useCallback(
+    (item) => {
+      onItemClick(item);
+    },
+    [onItemClick]
+  );
+
+  return (
+    <div>
+      {processedItems.map((item) => (
+        <div key={item.id} onClick={() => handleClick(item)}>
+          {item.name}: {item.processed}
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+## 베스트 프랙티스
+
+### 1. Hook 규칙 준수
+
+- Hook은 항상 컴포넌트의 최상위 레벨에서 호출
+- 조건문이나 반복문 안에서 Hook 호출 금지
+- React 함수 컴포넌트나 커스텀 Hook에서만 Hook 호출
+
+### 2. 의존성 배열 관리
+
+useEffect의 의존성 배열을 올바르게 관리하세요:
+
+```jsx
+// ❌ 잘못된 예시
+useEffect(() => {
+  fetchData();
+}, []); // 의존성이 누락됨
+
+// ✅ 올바른 예시
+useEffect(() => {
+  fetchData();
+}, [fetchData]); // fetchData가 변경될 때마다 실행
+```
+
+### 3. 커스텀 Hook 분리
+
+복잡한 로직은 커스텀 Hook으로 분리하세요:
+
+```jsx
+function useApi(url) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        setLoading(true);
+        const response = await fetch(url);
+        const result = await response.json();
+        setData(result);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchData();
+  }, [url]);
+
+  return { data, loading, error };
+}
+```
+
+## 마무리
+
+React Hooks는 함수형 컴포넌트를 더욱 강력하게 만들어주는 기능입니다. 올바른 사용법을 익히고 베스트 프랙티스를 따르면 깔끔하고 유지보수하기 쉬운 코드를 작성할 수 있습니다.
+
+React 공식 문서에서 더 자세한 내용을 확인할 수 있습니다.
